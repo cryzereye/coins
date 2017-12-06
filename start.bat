@@ -1,0 +1,1 @@
+python rates.py
