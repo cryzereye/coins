@@ -5,41 +5,43 @@ import playsound
 from threading import Thread
 
 # profile: change every transaction made then rerun script
-isLastBuy = False                     # buy/sell BTC
-amountUsed = int(2000)               # last amount used in buy/sell
-lastRate =  int(600894)              # last rate used in buy/sell
-lastBTC = float(0.00335317)          # last BTC gain/sold
+isLastBuy = True                     # buy/sell BTC
+lastRate =  int(705722)              # last rate used in buy/sell
 
 highestSellRate = lastRate
+highestBuyRate = lastRate
 lowestBuyRate = lastRate
     
 def printing(buyRate, sellRate):
     global highestSellRate
     global lowestBuyRate
+    global highestBuyRate
 
     if isLastBuy:
         if int(sellRate) > lastRate:
-            print (buyRate + "       " + sellRate + " >>>> " + str(lastRate) + "      SEEEEELL NOW"),
+            print (buyRate + "       " + sellRate + " >>>> " + str(lastRate) + "      SELL NOW"),
         else:
             print (buyRate + "       " + sellRate + "      " + str(lastRate) + "      HODL"),
     else:
         if int(buyRate) < lastRate:
-            print (buyRate + " <<<<  " + sellRate + "      " + str(lastRate) + "      BUUUUUY NOW"),
+            print (buyRate + " <<<<  " + sellRate + "      " + str(lastRate) + "      BUY NOW"),
         else:
             print (buyRate + "       " + sellRate + "      " + str(lastRate) + "      ..."),
     if highestSellRate < sellRate:
         highestSellRate = sellRate
-        print ("         $$$$$  ALL TIME HIGH BITCHES  $$$$$"),
+        print ("         ATH"),
         playsound.playsound('mario.mp3', True)
     if lowestBuyRate > buyRate: lowestBuyRate = buyRate
+    if highestBuyRate < buyRate: highestBuyRate = buyRate
 
     # dip detection, for PHP only
-    if ((int(highestSellRate) - int(buyRate))/1000)  > 0:
+    isDip = (int(highestBuyRate) - int(buyRate))/1000
+    if isDip > 0:
         print ("         D"),
-        for i in range( 0, ((int(highestSellRate) - int(buyRate))/1000)):
-            print ("I"),
+        print ("I") * isDip,
         print ("P"),
-        playsound.playsound('wololo.mp3', True)
+        if isDip > 5:
+            playsound.playsound('wololo.mp3', True)
     print ""
     
 def rateComp(buy, sell):
