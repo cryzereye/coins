@@ -5,18 +5,17 @@ import time
 import playsound
 from threading import Thread
 
-# profile: change every transaction made then rerun script
-isLastBuy = True                     # buy/sell BTC
-lastRate =  int(0)              # last rate used in buy/sell
-
-highestSellRate = lastRate
-highestBuyRate = lastRate
-lowestBuyRate = lastRate
+# globals
+isLastBuy = True
+lastRate = int(0)
+highestSellRate = int(0)
+highestBuyRate = int(0)
+lowestBuyRate = int(0)
     
 def printing(buyRate, sellRate):
     global highestSellRate
     global highestBuyRate
-
+    global lowestBuyRate
     if isLastBuy:
         if int(sellRate) > lastRate:
             print (buyRate + "       " + sellRate + " >>>> " + str(lastRate) + "      SELL NOW"),
@@ -39,7 +38,7 @@ def printing(buyRate, sellRate):
             print ("       "),
             print ("A") * isAth,
             print ("TH"),
-            if isAth > 17:
+            if isAth > 20:
                 playsound.playsound('nice.mp3', True)
             else:
                 playsound.playsound('mario.mp3', True)
@@ -47,7 +46,7 @@ def printing(buyRate, sellRate):
         print ("         D"),
         print ("I") * isDip,
         print ("P"),
-        if isDip > 10:
+        if isDip > 20:
             playsound.playsound('wololo.mp3', True)
     print ""
     
@@ -56,6 +55,9 @@ def rateComp(buy, sell):
     return isLastBuy and sell > lastRate or not isLastBuy and buy < lastRate
 
 def livethread():
+    """
+        1 thread function to load the rates then call the necessary print functions
+    """
     validTime = 0
 
     while True:
@@ -71,17 +73,46 @@ def livethread():
         validTime = rates['market']['expires_in_seconds']
 
         if int(validTime) > 0:
-            printing(buyRate, sellRate)        
-
+            printing(buyRate, sellRate)
         if rateComp(int(buyRate), int(sellRate)):
             playsound.playsound('buy.mp3', True)
 
         time.sleep(validTime)
 
-
 #####   MAIN   #####
-isLastBuy = bool(sys.argv[1])
-lastRate = int(sys.argv[2])
-print "BUY          SELL        LAST RATE   WHAT TO DO"
-t = Thread(target=livethread, args=())
-t.start()
+def main():
+    """
+    This is just for starting the whole script in a cleaner way
+    """
+    global isLastBuy
+    global lastRate
+
+    while True:
+        try:
+            isLastBuy = str(raw_input("Last action ([B]uy or [S]ell): "))
+            if isLastBuy == 'B': isLastBuy = bool(True)
+            elif isLastBuy == 'S': isLastBuy = bool(False)
+            else: next
+            break
+        except Exception:
+            next
+    while True:
+        try:
+            lastRate = int(raw_input("Last rate in history: "))
+            break
+        except Exception:
+            next
+    global highestSellRate
+    global highestBuyRate
+    global lowestBuyRate
+    highestSellRate = lastRate
+    highestBuyRate = lastRate
+    lowestBuyRate = lastRate
+
+    print "BUY          SELL        LAST RATE   WHAT TO DO"
+    t = Thread(target=livethread, args=())
+    t.start()
+
+
+if __name__ == '__main__':
+    main()
