@@ -3,6 +3,7 @@ import json
 import urllib2
 import time
 import playsound
+import loading
 from threading import Thread
 
 # globals
@@ -11,11 +12,16 @@ lastRate = int(0)
 highestSellRate = int(0)
 highestBuyRate = int(0)
 lowestBuyRate = int(0)
+ath_buy = int(0)
+ath_sell = int(0)
     
 def printing(buyRate, sellRate):
     global highestSellRate
     global highestBuyRate
     global lowestBuyRate
+    global ath_buy
+    global ath_sell
+    spread = int(buyRate) - int(sellRate)
     if isLastBuy:
         if int(sellRate) > lastRate:
             print (buyRate + "       " + sellRate + " >>>> " + str(lastRate) + "      SELL NOW"),
@@ -27,18 +33,24 @@ def printing(buyRate, sellRate):
         else:
             print (buyRate + "       " + sellRate + "      " + str(lastRate) + "      ..."),
     
-    if highestBuyRate < buyRate: highestBuyRate = buyRate
+    if highestBuyRate < buyRate:
+        highestBuyRate = buyRate
+        if highestBuyRate > ath_buy:
+            ath_buy = highestBuyRate
+            loading.updateATH(int(ath_buy), int(ath_sell))
 
     isDip = (int(highestBuyRate) - int(buyRate))/2000
     isAth = (int(sellRate) - int(lastRate))/2000
     # dip detection, for PHP only
     if highestSellRate < sellRate and sellRate > lastRate:
         highestSellRate = sellRate
+        ath_sell = sellRate
+        loading.updateATH(int(ath_buy), int(ath_sell))
         if isAth > 0:
             print ("       "),
             print ("A") * isAth,
             print ("TH"),
-            if isAth > 20:
+            if isAth > spread/2000:
                 playsound.playsound('nice.mp3', True)
             else:
                 playsound.playsound('mario.mp3', True)
@@ -46,7 +58,7 @@ def printing(buyRate, sellRate):
         print ("         D"),
         print ("I") * isDip,
         print ("P"),
-        if isDip > 20:
+        if isDip > spread/2000:
             playsound.playsound('wololo.mp3', True)
     print ""
     
@@ -84,6 +96,12 @@ def main():
     """
     This is just for starting the whole script in a cleaner way
     """
+    global ath_buy
+    global ath_sell
+    ath = loading.getATH()
+    ath_buy = ath['ath_buy']
+    ath_sell = ath['ath_sell']
+
     global isLastBuy
     global lastRate
 
@@ -112,7 +130,6 @@ def main():
     print "BUY          SELL        LAST RATE   WHAT TO DO"
     t = Thread(target=livethread, args=())
     t.start()
-
 
 if __name__ == '__main__':
     main()
