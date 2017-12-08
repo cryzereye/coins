@@ -1,3 +1,4 @@
+import sys
 import json
 import urllib2
 import time
@@ -6,7 +7,7 @@ from threading import Thread
 
 # profile: change every transaction made then rerun script
 isLastBuy = True                     # buy/sell BTC
-lastRate =  int(705722)              # last rate used in buy/sell
+lastRate =  int(0)              # last rate used in buy/sell
 
 highestSellRate = lastRate
 highestBuyRate = lastRate
@@ -14,7 +15,6 @@ lowestBuyRate = lastRate
     
 def printing(buyRate, sellRate):
     global highestSellRate
-    global lowestBuyRate
     global highestBuyRate
 
     if isLastBuy:
@@ -27,20 +27,26 @@ def printing(buyRate, sellRate):
             print (buyRate + " <<<<  " + sellRate + "      " + str(lastRate) + "      BUY NOW"),
         else:
             print (buyRate + "       " + sellRate + "      " + str(lastRate) + "      ..."),
-    if highestSellRate < sellRate:
-        highestSellRate = sellRate
-        print ("         ATH"),
-        playsound.playsound('mario.mp3', True)
-    if lowestBuyRate > buyRate: lowestBuyRate = buyRate
+    
     if highestBuyRate < buyRate: highestBuyRate = buyRate
 
+    isDip = (int(highestBuyRate) - int(buyRate))/2000
+    isAth = (int(sellRate) - int(lastRate))/2000
     # dip detection, for PHP only
-    isDip = (int(highestBuyRate) - int(buyRate))/1000
-    if isDip > 0:
+    if highestSellRate < sellRate and sellRate > lastRate:
+        highestSellRate = sellRate
+        if isAth > 0:
+            print ("       "),
+            print ("A") * isAth,
+            print ("TH"),
+        playsound.playsound('mario.mp3', True)
+        if isAth > 10:
+            playsound.playsound('nice.mp3', True)
+    elif isDip > 0:
         print ("         D"),
         print ("I") * isDip,
         print ("P"),
-        if isDip > 5:
+        if isDip > 10:
             playsound.playsound('wololo.mp3', True)
     print ""
     
@@ -73,6 +79,8 @@ def livethread():
 
 
 #####   MAIN   #####
+isLastBuy = bool(sys.argv[1])
+lastRate = int(sys.argv[2])
 print "BUY          SELL        LAST RATE   WHAT TO DO"
 t = Thread(target=livethread, args=())
 t.start()
