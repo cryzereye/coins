@@ -39,7 +39,7 @@ def printing(buyRate, sellRate):
             print ("       "),
             print ("A") * isAth,
             print ("TH"),
-        playsound.playsound('mario.mp3', True)
+            playsound.playsound('mario.mp3', True)
         if isAth > 10:
             playsound.playsound('nice.mp3', True)
     elif isDip > 0:
