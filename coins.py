@@ -4,6 +4,7 @@ import urllib2
 import time
 import playsound
 import loading
+import kb
 from threading import Thread
 
 # globals
@@ -133,3 +134,4 @@ def main():
 
 if __name__ == '__main__':
     main()
+    kb.read_stop()

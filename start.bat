@@ -1,1 +1,1 @@
-python rates.py
+python coins.py
