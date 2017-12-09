@@ -1,7 +1,6 @@
 import msvcrt
 import os
 import sys
-import coins
 
 def read_stop():
     while True:

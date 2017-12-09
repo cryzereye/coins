@@ -72,6 +72,7 @@ def livethread():
         1 thread function to load the rates then call the necessary print functions
     """
     validTime = 0
+    rates = []
 
     while True:
         try:
