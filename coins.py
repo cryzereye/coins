@@ -5,6 +5,8 @@ import time
 import playsound
 import loading
 import kb
+import datetime
+import csv
 from threading import Thread
 
 # globals
@@ -25,14 +27,14 @@ def printing(buyRate, sellRate):
     spread = int(buyRate) - int(sellRate)
     if isLastBuy:
         if int(sellRate) > lastRate:
-            print (buyRate + "       " + sellRate + " >>>> " + str(lastRate) + "      SELL NOW"),
+            print (buyRate + "       " + sellRate + " >>>> " + str(lastRate) + "      SELL NOW   " + str(spread)),
         else:
-            print (buyRate + "       " + sellRate + "      " + str(lastRate) + "      HODL"),
+            print (buyRate + "       " + sellRate + "      " + str(lastRate) + "      HODL       " + str(spread)),
     else:
         if int(buyRate) < lastRate:
-            print (buyRate + " <<<<  " + sellRate + "      " + str(lastRate) + "      BUY NOW"),
+            print (buyRate + " <<<<  " + sellRate + "      " + str(lastRate) + "      BUY NOW    " + str(spread)),
         else:
-            print (buyRate + "       " + sellRate + "      " + str(lastRate) + "      ..."),
+            print (buyRate + "       " + sellRate + "      " + str(lastRate) + "      ........   " + str(spread)),
     
     if highestBuyRate < buyRate:
         highestBuyRate = buyRate
@@ -41,9 +43,9 @@ def printing(buyRate, sellRate):
             loading.updateATH(int(ath_buy), int(ath_sell))
 
     isDip = (int(highestBuyRate) - int(buyRate))/2000
-    isAth = (int(sellRate) - int(lastRate))/2000
+    isAth = (int(sellRate) - int(highestSellRate))/2000
     # dip detection, for PHP only
-    if highestSellRate < sellRate and sellRate > lastRate:
+    if highestSellRate < sellRate:
         highestSellRate = sellRate
         ath_sell = sellRate
         loading.updateATH(int(ath_buy), int(ath_sell))
@@ -78,13 +80,16 @@ def livethread():
         try:
             # get rates from api
             rates = json.load(urllib2.urlopen("https://quote.coins.ph/v1/markets/BTC-PHP"))
+            buyRate = rates['market']['ask']
+            sellRate = rates['market']['bid']
+            validTime = rates['market']['expires_in_seconds']
+            rate_row = [datetime.datetime.now(), buyRate, sellRate]
+            with open(r'history.csv','ab') as f:
+                writer = csv.writer(f)
+                writer.writerow(rate_row)
         except Exception:
             print "API failed us"
             next
-
-        buyRate = rates['market']['ask']
-        sellRate = rates['market']['bid']
-        validTime = rates['market']['expires_in_seconds']
 
         if int(validTime) > 0:
             printing(buyRate, sellRate)
