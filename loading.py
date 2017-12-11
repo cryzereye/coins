@@ -30,10 +30,10 @@ def save_rates(rates):
 
 def get_rates():
     try:
-        data = json.load(open("profile.json"))
+        data = json.load(open("rates.json"))
         return data
     except Exception:
-        return []
+        return {}
 
 def save_profile(lastAction, rate, fiat, crypto):
     data = {'action' : lastAction,

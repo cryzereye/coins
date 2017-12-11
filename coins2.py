@@ -17,7 +17,7 @@ def main():
     main function to start it all
     """
     inputs = get_userinput()
-    rates = {}
+    rates = loading.get_rates()
     flags = {}
 
     # computation variables
@@ -30,6 +30,7 @@ def main():
     rates['buy_min'] = int(0)
     rates['sell_max'] = int(0)
     rates['sell_min'] = int(0)
+    
 
     # flags
     flags['last_buy'] = bool(inputs['action'])
@@ -85,12 +86,12 @@ def print_stuff(rates, flags, delta, buy, sell):
     delta_ave = (delta['buy'] + delta['sell'])/2
     if delta_ave > 0:
         if delta_ave/1000 > 0:
-            print ("+") * delta_ave,
+            print ("+" * int(delta_ave/1000)),
         else:
             print ("+"),
     elif delta_ave < 0:
         if delta_ave/1000 < 0:
-            print ("-") * delta_ave,
+            print ("-" * int(delta_ave/1000)),
         else:
             print ("-"),
     print ""
@@ -154,7 +155,7 @@ def livethread(rates, flags):
 
         if int(validTime) > 0:
             comparison(rates, flags, int(buyRate), int(sellRate))
-
+        loading.save_rates(rates)
         time.sleep(validTime)
 
 def get_userinput():
