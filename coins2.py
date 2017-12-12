@@ -39,6 +39,8 @@ def main():
     flags['spread_beaten'] = False
     flags['ath'] = False
     flags['dip'] = False
+    flags['steep_up'] = False
+    flags['steep_down'] = False
 
     print " BUY   |  SELL  |  RATE  |       PROFIT       |   DO   | DELTA  |"
     t = Thread(target=livethread, args=(rates, flags))
@@ -49,6 +51,10 @@ def play_notif(flags):
         playsound.playsound('mario.mp3', True)
     elif flags['dip']:
         playsound.playsound('wololo.mp3', True)
+    elif flags['steep_up']:
+        playsound.playsound('nice.mp3', True)
+    elif flags['steep_down']:
+        playsound.playsound('inception.mp3', True)
     if flags['buy'] or flags['sell']:
         playsound.playsound('buy.mp3', True)
 
@@ -121,8 +127,10 @@ def comparison(rates, flags, buy, sell):
     flags['buy'] = bool(buying and rates['last'] > buy)
     flags['sell'] = bool(not buying and rates['last'] < sell)
     flags['spread_beaten'] = bool(buying and buy + spread < rates['sell_max']) or bool(not buying and sell - spread > rates['buy_min'])
-    flags['ath'] = bool(not buying and delta['sell_from_last']/2000 < 0)
-    flags['dip'] = bool(buying and delta['buy_from_last']/2000 > 0)
+    flags['ath'] = bool(not buying and delta['sell_from_last'] < spread * -1)
+    flags['dip'] = bool(buying and delta['buy_from_last'] > spread)
+    flags['steep_up'] = bool(not buying and delta['sell']/2000 <= -5)
+    flags['steep_down'] = bool(buying and delta['buy']/2000 >= 5)
 
     # update prev rates
     rates['prev_buy'] = buy
