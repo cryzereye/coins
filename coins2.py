@@ -129,8 +129,9 @@ def comparison(rates, flags, buy, sell):
     flags['spread_beaten'] = bool(buying and buy + spread < rates['sell_max']) or bool(not buying and sell - spread > rates['buy_min'])
     flags['ath'] = bool(not buying and delta['sell_from_last'] < spread * -1)
     flags['dip'] = bool(buying and delta['buy_from_last'] > spread)
-    flags['steep_up'] = bool(not buying and delta['sell']/2000 <= -5)
-    flags['steep_down'] = bool(buying and delta['buy']/2000 >= 5)
+    #bug - 
+    #flags['steep_up'] = bool(not buying and delta['sell']/2000 >= -5)
+    #flags['steep_down'] = bool(buying and delta['buy']/2000 <= 5)
 
     # update prev rates
     rates['prev_buy'] = buy
