@@ -18,6 +18,7 @@ How to use:
     - Remaining money
     - Remaining BTC
 3. Profile entered above will be saved to profile.json. This can be reused on your discretion.
+4. When you did a transaction, press ~ (SHIFT + \`) to update inputs
 
 Columns:
 1. BUY - shows current buy rate
@@ -30,6 +31,8 @@ Columns:
          - 1 - means rates decreased by below 1999 php, 1000 per + if multiple
 
 
-NOTE: This is "optimized" for full buy/sell transactions
+NOTE:
+- This is "optimized" for full buy/sell transactions. v2 can be used for partial buy/sell. Just reset your profile
+- After the rates are shown, you have ~30 seconds to do your action
 
 donate:  3B2bVeQJ2424v5tALhpaaeNzc42RYTRdMF 
