@@ -91,7 +91,7 @@ def print_stuff(rates, flags, delta, buy, sell):
             print ("+"),
     elif delta_ave < 0:
         if delta_ave/1000 < 0:
-            print ("-" * int(delta_ave/1000)),
+            print ("-" * int(delta_ave/1000 * -1)),
         else:
             print ("-"),
     print ""
