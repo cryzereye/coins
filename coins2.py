@@ -9,6 +9,7 @@ import csv
 import playsound
 import loading
 import kb
+import predict
 
 
 
@@ -19,17 +20,20 @@ def main():
     inputs = get_userinput()
     rates = loading.get_rates()
     flags = {}
+    hist = []
 
     # computation variables
+    if rates == {}:
+        rates['prev_buy'] = int(inputs['rate'])
+        rates['prev_sell'] = int(inputs['rate'])
+        rates['buy_max'] = int(0)
+        rates['buy_min'] = int(0)
+        rates['sell_max'] = int(0)
+        rates['sell_min'] = int(0)
     rates['last'] = int(inputs['rate'])
     rates['fiat'] = float(inputs['fiat'])
     rates['btc'] = float(inputs['crypto'])
-    rates['prev_buy'] = int(inputs['rate'])
-    rates['prev_sell'] = int(inputs['rate'])
-    rates['buy_max'] = int(0)
-    rates['buy_min'] = int(0)
-    rates['sell_max'] = int(0)
-    rates['sell_min'] = int(0)
+    
     
 
     # flags
@@ -43,18 +47,24 @@ def main():
     flags['steep_down'] = False
 
     print " BUY   |  SELL  |  RATE  |       PROFIT       |   DO   | DELTA  |"
-    t = Thread(target=livethread, args=(rates, flags))
+    t = Thread(target=livethread, args=(rates, flags, hist))
     t.start()
 
 def play_notif(flags):
-    if flags['ath']:
+    if flags['increase']:
         playsound.playsound('mario.mp3', True)
-    elif flags['dip']:
+    elif flags['decrease']:
         playsound.playsound('wololo.mp3', True)
-    elif flags['steep_up']:
+
+    if flags['steep_up']:
         playsound.playsound('nice.mp3', True)
+        if flags['ath']:
+            playsound.playsound('nice.mp3', True)
     elif flags['steep_down']:
         playsound.playsound('inception.mp3', True)
+        if flags['dip']:
+            playsound.playsound('inception.mp3', True)
+
     if flags['buy'] or flags['sell']:
         playsound.playsound('buy.mp3', True)
 
@@ -92,17 +102,17 @@ def print_stuff(rates, flags, delta, buy, sell):
     delta_ave = (delta['buy'] + delta['sell'])/2
     if delta_ave > 0:
         if delta_ave/1000 > 0:
-            print ("+" * int(delta_ave/1000)),
+            print ("+" * int(delta_ave/1000 * -1)),
         else:
             print ("+"),
     elif delta_ave < 0:
         if delta_ave/1000 < 0:
-            print ("-" * int(delta_ave/1000 * -1)),
+            print ("-" * int(delta_ave/1000)),
         else:
             print ("-"),
     print ""
 
-def comparison(rates, flags, buy, sell):
+def comparison(rates, flags, hist, buy, sell):
     """
     where all computation and flag setting will happen
     """
@@ -135,23 +145,26 @@ def comparison(rates, flags, buy, sell):
     flags['spread_beaten'] = bool(buying and buy + spread < rates['sell_max']) or bool(not buying and sell - spread > rates['buy_min'])
     flags['ath'] = bool(not buying and delta['sell_from_last'] < spread * -1)
     flags['dip'] = bool(buying and delta['buy_from_last'] > spread)
-    flags['steep_up'] = bool(not buying and delta['sell']/2000 >= 5)
-    flags['steep_down'] = bool(buying and delta['buy']/2000 <= -5)
+    flags['steep_up'] = bool((delta['buy'] + delta['sell'])/2/2000 > 4)
+    flags['steep_down'] = bool((delta['buy'] + delta['sell'])/2/2000 < -4)
+    flags['increase'] = bool((delta['buy'] + delta['sell'])/2 > 0)
+    flags['decrease'] = bool((delta['buy'] + delta['sell'])/2 < 0)
+
+    print_stuff(rates, flags, delta, buy, sell)
+    play_notif(flags)
+    # predict.predict(hist, buy, sell)
 
     # update prev rates
     rates['prev_buy'] = buy
     rates['prev_sell'] = sell
 
-    print_stuff(rates, flags, delta, buy, sell)
-    play_notif(flags)
-
-def livethread(rates, flags):
+def livethread(rates, flags, hist):
     """
         1 thread function to load the rates then call the necessary print functions
     """
     validTime = 0
     new_rates = []
-
+    errored = True
     while True:
         try:
             # get rates from api
@@ -163,12 +176,16 @@ def livethread(rates, flags):
             with open(r'history.csv','ab') as f:
                 writer = csv.writer(f)
                 writer.writerow(rate_row)
+            errored = False
         except Exception:
-            print "API failed us"
+            # prevent repeated "API failed us"
+            if not errored:
+                print "API failed us"
+            errored = True
             next
 
         if int(validTime) > 0:
-            comparison(rates, flags, int(buyRate), int(sellRate))
+            comparison(rates, flags, hist, int(buyRate), int(sellRate))
         loading.save_rates(rates)
         time.sleep(validTime)
 
