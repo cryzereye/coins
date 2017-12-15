@@ -126,14 +126,8 @@ def comparison(rates, flags, hist, buy, sell):
     if sell < rates['sell_min']: rates['sell_min'] = sell
 
     # compute delta
-    if rates['prev_buy'] == 0:
-        delta['buy'] = 0
-    else:
-        delta['buy'] = buy - rates['prev_buy']
-    if rates['prev_sell'] == 0:
-        delta['sell'] = 0
-    else:
-        delta['sell'] = sell - rates['prev_sell']
+    delta['buy'] = buy - rates['prev_buy']
+    delta['sell'] = sell - rates['prev_sell']
     delta['buy_from_sell'] = rates['sell_max'] - buy
     delta['sell_from_buy'] = rates['buy_min'] - sell
     delta['buy_from_last'] = rates['last'] - buy
