@@ -68,7 +68,7 @@ def play_notif(flags):
     if flags['buy'] or flags['sell']:
         playsound.playsound('buy.mp3', True)
 
-def print_stuff(rates, flags, delta, buy, sell):
+def print_stuff(rates, flags, delta_ave, buy, sell):
     """
     do all dynamic prints
     """
@@ -99,15 +99,14 @@ def print_stuff(rates, flags, delta, buy, sell):
         print ("...... |"),
 
     # DELTA column
-    delta_ave = (delta['buy'] + delta['sell'])/2
     if delta_ave > 0:
         if delta_ave/1000 > 0:
-            print ("+" * int(delta_ave/1000 * -1)),
+            print ("+" * int(delta_ave/1000)),
         else:
             print ("+"),
     elif delta_ave < 0:
         if delta_ave/1000 < 0:
-            print ("-" * int(delta_ave/1000)),
+            print ("-" * int(delta_ave/1000 * -1)),
         else:
             print ("-"),
     print ""
@@ -144,13 +143,13 @@ def comparison(rates, flags, hist, buy, sell):
     flags['increase'] = bool((delta['buy'] + delta['sell'])/2 > 0)
     flags['decrease'] = bool((delta['buy'] + delta['sell'])/2 < 0)
 
-    print_stuff(rates, flags, delta, buy, sell)
-    play_notif(flags)
-    # predict.predict(hist, buy, sell)
-
     # update prev rates
     rates['prev_buy'] = buy
     rates['prev_sell'] = sell
+
+    print_stuff(rates, flags, (delta['buy'] + delta['sell'])/2, buy, sell)
+    play_notif(flags)
+    # predict.predict(hist, buy, sell)
 
 def livethread(rates, flags, hist):
     """
